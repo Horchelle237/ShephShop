@@ -23,4 +23,63 @@ model User {
   isEmailVerified Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  addresses       Address[]
+}
+
+model Address {
+  id                String   @id @default(cuid())
+  userId            String
+  label             String
+  street            String
+  complement        String?
+  postalCode        String
+  city              String
+  country           String
+  phone             String?
+  isDefaultShipping Boolean  @default(false)
+  isDefaultBilling  Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+   id                String   @id @default(cuid())
+   name              String
+   slug              String @unique
+   description       String?
+   image             String?
+   parentId          String?
+   isActive          Boolean  @default(true)
+   createdAt         DateTime @default(now())
+   updatedAt         DateTime @updatedAt 
+
+   parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+   children Category[] @relation("CategoryHierarchy")
+   productLinks ProductCategory[]
+}
+
+model Product {
+   id                String   @id @default(cuid())
+   name              String
+   slug              String   @unique
+   description       String?
+   price             Decimal
+   isActive          Boolean  @default(true)
+   createdAt         DateTime @default(now())
+   updatedAt         DateTime @updatedAt 
+
+   categoryLinks ProductCategory[]
+}
+
+model ProductCategory {
+  productId  String
+  categoryId String
+
+  product  Product  @relation(fields: [productId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  @@id([productId, categoryId])
 }
